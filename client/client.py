@@ -1,61 +1,46 @@
-import logging
-from getpass import getpass
-from argparse import ArgumentParser
-import asyncio
 import slixmpp
+from aioconsole import ainput
 
-asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-class EchoBot(slixmpp.ClientXMPP):
+class Client(slixmpp.ClientXMPP):
     def __init__(self, jid, password):
         slixmpp.ClientXMPP.__init__(self, jid, password)
         self.add_event_handler("session_start", self.start)
         self.add_event_handler("message", self.message)
+        self.register_plugin('xep_0030') # Service Discovery
+        self.register_plugin('xep_0004') # Data Forms
+        self.register_plugin('xep_0060') # PubSub
+        self.register_plugin('xep_0199') # XMPP Ping
 
     async def start(self, event):
         self.send_presence()
         await self.get_roster()
+        online = True
+        while online:
+            option_selected = int(input('Please, select an option ==> '))
+            if (option_selected == 1):
+                receptor = 'oscarsaravia@alumchat.fun'
+                keep_chat = True
+                while keep_chat:
+                    message = await ainput('==> ')
+                    if message == 'exit':
+                        keep_chat = False
+                    self.send_private_message(receptor, message)
+                    print(message)
 
     def message(self, msg):
+        emisor = str(msg['from'])
+        emisor_name = emisor.split('/')[0]
         if msg['type'] in ('chat', 'normal'):
-            msg.reply("Thanks for sending\n%(body)s" % msg).send()
-
-
-if __name__ == '__main__':
-    # Setup the command line arguments.
-    parser = ArgumentParser(description=EchoBot.__doc__)
-
-    # Output verbosity options.
-    parser.add_argument("-q", "--quiet", help="set logging to ERROR",
-                        action="store_const", dest="loglevel",
-                        const=logging.ERROR, default=logging.INFO)
-    parser.add_argument("-d", "--debug", help="set logging to DEBUG",
-                        action="store_const", dest="loglevel",
-                        const=logging.DEBUG, default=logging.INFO)
-
-    # JID and password options.
-    parser.add_argument("-j", "--jid", dest="jid",
-                        help="JID to use")
-    parser.add_argument("-p", "--password", dest="password",
-                        help="password to use")
-
-    args = parser.parse_args()
-
-    # Setup logging.
-    logging.basicConfig(level=args.loglevel,
-                        format='%(levelname)-8s %(message)s')
-
-    if args.jid is None:
-        args.jid = input("Username: ")
-    if args.password is None:
-        args.password = getpass("Password: ")
-
-
-    xmpp = EchoBot(args.jid, args.password)
-    xmpp.register_plugin('xep_0030') # Service Discovery
-    xmpp.register_plugin('xep_0004') # Data Forms
-    xmpp.register_plugin('xep_0060') # PubSub
-    xmpp.register_plugin('xep_0199') # XMPP Ping
-
-    xmpp.connect()
-    xmpp.process()
+            print(emisor_name, ': %(body)s'% msg)
+            # msg.reply("Thanks for sending\n%(body)s" % msg).send()
+    
+    def send_private_message(self, receptor, message = ''):
+		# print(f'Sending message to {to}')
+		# print(f'Message: {message}')
+	    self.send_message(
+			mto=receptor,
+			mbody=message,
+			mtype='chat'
+		)
+		# print('Message sent succefully')
