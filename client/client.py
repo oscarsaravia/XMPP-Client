@@ -1,31 +1,20 @@
-import asyncio
 import logging
+from getpass import getpass
+from argparse import ArgumentParser
+import asyncio
+import slixmpp
 
-from slixmpp import ClientXMPP
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-
-class EchoBot(ClientXMPP):
-
+class EchoBot(slixmpp.ClientXMPP):
     def __init__(self, jid, password):
-        ClientXMPP.__init__(self, jid, password)
-
-        self.add_event_handler("session_start", self.session_start)
+        slixmpp.ClientXMPP.__init__(self, jid, password)
+        self.add_event_handler("session_start", self.start)
         self.add_event_handler("message", self.message)
 
-        # If you wanted more functionality, here's how to register plugins:
-        # self.register_plugin('xep_0030') # Service Discovery
-        # self.register_plugin('xep_0199') # XMPP Ping
-
-        # Here's how to access plugins once you've registered them:
-        # self['xep_0030'].add_feature('echo_demo')
-
-    def session_start(self, event):
+    async def start(self, event):
         self.send_presence()
-        self.get_roster()
-
-        # Most get_*/set_* methods from plugins use Iq stanzas, which
-        # are sent asynchronously. You can almost always provide a
-        # callback that will be executed when the reply is received.
+        await self.get_roster()
 
     def message(self, msg):
         if msg['type'] in ('chat', 'normal'):
@@ -33,12 +22,40 @@ class EchoBot(ClientXMPP):
 
 
 if __name__ == '__main__':
-    # Ideally use optparse or argparse to get JID,
-    # password, and log level.
+    # Setup the command line arguments.
+    parser = ArgumentParser(description=EchoBot.__doc__)
 
-    logging.basicConfig(level=logging.DEBUG,
+    # Output verbosity options.
+    parser.add_argument("-q", "--quiet", help="set logging to ERROR",
+                        action="store_const", dest="loglevel",
+                        const=logging.ERROR, default=logging.INFO)
+    parser.add_argument("-d", "--debug", help="set logging to DEBUG",
+                        action="store_const", dest="loglevel",
+                        const=logging.DEBUG, default=logging.INFO)
+
+    # JID and password options.
+    parser.add_argument("-j", "--jid", dest="jid",
+                        help="JID to use")
+    parser.add_argument("-p", "--password", dest="password",
+                        help="password to use")
+
+    args = parser.parse_args()
+
+    # Setup logging.
+    logging.basicConfig(level=args.loglevel,
                         format='%(levelname)-8s %(message)s')
 
-    xmpp = EchoBot('somejid@example.com', 'use_getpass')
+    if args.jid is None:
+        args.jid = input("Username: ")
+    if args.password is None:
+        args.password = getpass("Password: ")
+
+
+    xmpp = EchoBot(args.jid, args.password)
+    xmpp.register_plugin('xep_0030') # Service Discovery
+    xmpp.register_plugin('xep_0004') # Data Forms
+    xmpp.register_plugin('xep_0060') # PubSub
+    xmpp.register_plugin('xep_0199') # XMPP Ping
+
     xmpp.connect()
     xmpp.process()
