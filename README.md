@@ -1,4 +1,2 @@
-# XMPP Client
-
-### Universidad del Valle de Guatemala
-### Redes CC3067
+# ========== XMPP Client ==========
+### This is a chat developed in python using de XMPP protocol
