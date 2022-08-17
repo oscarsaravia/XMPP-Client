@@ -2,7 +2,7 @@
 ### This is a chat developed in python using de XMPP protocol, the program is executed in terminal, where you can execute multiple chat functionalities
 
 ## Implemented functionalities:
-[x] Register new account
+[x] Register new account\n
 [x] Login
 [x] Logout
 [x] Delete account
