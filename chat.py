@@ -6,6 +6,7 @@ import asyncio
 from utils import account_utils, menu_utils
 from client import client
 
+# MENU VARIABLES
 execute_menu = True
 option_selected = 0
 menu = menu_utils.get_menu_interface()
@@ -27,9 +28,11 @@ if __name__ == '__main__':
                         format='%(levelname)-8s %(message)s')
 
 
+# MAIN MENU LOOP
 while execute_menu:
   print(menu)
   option_selected = int(input('===> '))
+  # REGISTER A NEW ACCOUNT
   if (option_selected == 1):
     print('REGISTERING ACCOUNT...\n ')
     status = account_utils.register_user_account()
@@ -37,11 +40,14 @@ while execute_menu:
       print('Succesfully created account!')
     else:
       print('Error while creating your account :(')
+  # LOGIN WITH EMAIL AND PASSWORD
   elif (option_selected == 2):
     jid = input("Please enter your email: ")
     password = getpass("Password: ")
     print('LOGGIN IN...')
+    # CREATED CLIENT INSTANCE
     xmpp = client.Client(jid, password)
+  # QUIT APPLICATION
   elif (option_selected == 3):
     execute_menu = False
 

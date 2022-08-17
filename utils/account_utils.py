@@ -1,5 +1,5 @@
 import xmpp
-
+# Function to register an account
 def register_user_account() -> bool:
   email_input = input("Please enter your email: ")
   password_input = input("Please enter your password: ")
