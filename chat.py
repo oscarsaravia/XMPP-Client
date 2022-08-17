@@ -38,11 +38,10 @@ while execute_menu:
     else:
       print('Error while creating your account :(')
   elif (option_selected == 2):
+    jid = input("Please enter your email: ")
+    password = getpass("Password: ")
     print('LOGGIN IN...')
-    # DESCOMENTAR PARA QUE EL USUARIO INGRESE EL EMAIL Y PASSWORD
-    # args.jid = input("Username: ")
-    # args.password = getpass("Password: ")
-    xmpp = client.Client("oscarregister@alumchat.fun", "1234")
+    xmpp = client.Client(jid, password)
   elif (option_selected == 3):
     execute_menu = False
 

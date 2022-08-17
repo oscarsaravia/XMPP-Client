@@ -8,13 +8,18 @@ class Client(slixmpp.ClientXMPP):
     def __init__(self, jid, password):
         slixmpp.ClientXMPP.__init__(self, jid, password)
         self.private_chat= ''
+        self.group_name = ''
+        self.actual_room = ''
         self.add_event_handler("message", self.message)
         self.add_event_handler("session_start", self.start)
+        self.add_event_handler("groupchat_message", self.groupchat_message)
         self.register_plugin('xep_0030') # Service Discovery
         self.register_plugin('xep_0004') # Data Forms
         self.register_plugin('xep_0060') # PubSub
         self.register_plugin('xep_0199') # XMPP Ping
+        self.register_plugin('xep_0085')
         self.register_plugin('xep_0077')
+        self.register_plugin('xep_0045')
 
         self.connect(disable_starttls=True)
         self.process(forever=False)
@@ -85,10 +90,22 @@ class Client(slixmpp.ClientXMPP):
                 self.send_presence(pshow=presence_value, pstatus=message_test)
                 await self.get_roster()
             elif (option_selected == 6):
+                groupname = await ainput('Please enter the name you want to use: ')
+                chat_id = await ainput('Please enter the chat ID: ')
+                self.join_chat_group(groupname, chat_id)
+                online = True
+                while online:
+                    message = await ainput('==> ')
+                    if message == 'exit()':
+                        self.private_chat = ''
+                        online = False
+                    else:
+                        await self.group_message(message, self.actual_room)
+            elif (option_selected == 7):
                 await self.delete_account()
                 await self.get_roster()
                 online = False
-            elif (option_selected == 7):
+            elif (option_selected == 8):
                 self.disconnect(wait=False)
                 online = False
             
@@ -102,6 +119,19 @@ class Client(slixmpp.ClientXMPP):
             else:
                 await aprint(emisor_name, ': %(body)s'% msg)
             # msg.reply("Thanks for sending\n%(body)s" % msg).send()
+
+    async def groupchat_message(self, message):
+        if message['type'] == 'groupchat':
+
+            sender = str(message['from'])
+            sender = sender[:sender.index("/")]
+            body = str(message['body'])
+            
+            print(sender, "says: ", body)
+    
+    async def group_message(self, message, chat_group):
+        self.send_message(mto=chat_group, mbody=message, mtype='groupchat')
+
 
     async def delete_account(self):
             confirmation = await ainput('Are you sure you want to delete your account?: \n1. Yes\n2. No\n')
@@ -119,6 +149,10 @@ class Client(slixmpp.ClientXMPP):
                     self.disconnect()
             else:
                 await self.get_roster()     
+    
+    def join_chat_group(self, username, chat_id):
+        self.actual_room = chat_id
+        self.plugin['xep_0045'].join_muc(chat_id, username, maxhistory=False)
     
     def send_private_message(self, receptor, message = ''):
 	    self.send_message(

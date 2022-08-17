@@ -17,8 +17,9 @@ def get_chat_interface() -> str:
     3. Send message to user
     4. Get contact info
     5. Change Presence and Status message
-    6. Delete Account
-    7. Logout
+    6. Join Chat Group
+    7. Delete Account
+    8. Logout
   '''
 
   return chat_menu
