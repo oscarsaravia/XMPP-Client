@@ -3,7 +3,6 @@
 
 ## Implemented functionalities:
 [x] Register new account
-
 [x] Login
 [x] Logout
 [x] Delete account
