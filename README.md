@@ -3,15 +3,25 @@
 
 ## Implemented functionalities:
 [x] Register new account
+
 [x] Login
+
 [x] Logout
+
 [x] Delete account
+
 [x] Show users and the respective states
+
 [x] Add users to your contact list
+
 [x] Show user details
+
 [x] One to one chat
+
 [x] Group chats
+
 [x] Set your state
+
 [x] Notifications
 
 ## Instalation:
