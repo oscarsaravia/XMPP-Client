@@ -94,11 +94,12 @@ class Client(slixmpp.ClientXMPP):
                 chat_id = await ainput('Please enter the chat ID: ')
                 self.join_chat_group(groupname, chat_id)
                 online = True
+                await aprint('Send exit() to leave group chat')
                 while online:
                     message = await ainput('==> ')
                     if message == 'exit()':
-                        self.private_chat = ''
                         online = False
+                        self.private_chat = ''
                     else:
                         await self.group_message(message, self.actual_room)
             elif (option_selected == 7):
@@ -122,12 +123,10 @@ class Client(slixmpp.ClientXMPP):
 
     async def groupchat_message(self, message):
         if message['type'] == 'groupchat':
-
-            sender = str(message['from'])
-            sender = sender[:sender.index("/")]
+            emisor = str(message['from']).split('/')[1]
             body = str(message['body'])
             
-            print(sender, "says: ", body)
+            await aprint(emisor, ": ", body)
     
     async def group_message(self, message, chat_group):
         self.send_message(mto=chat_group, mbody=message, mtype='groupchat')
